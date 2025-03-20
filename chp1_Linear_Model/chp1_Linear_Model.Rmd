@@ -1,0 +1,169 @@
+---
+title: "chp1_Linear_Model"
+author: "bob"
+date: "2025-03-20"
+output: html_document
+---
+
+```{r load-packages, echo = false, message=FALSE, warning=FALSE}
+# 定义安装函数
+install_if_missing <- function(packages) {
+  for (pkg in packages) {
+    if (!require(pkg, character.only = TRUE, quietly = TRUE)) {
+      install.packages(pkg)
+      library(pkg, character.only = TRUE)
+    }
+  }
+}
+
+# 使用函数批量安装
+install_if_missing(c("randomForest", "rpart.plot", 'gbm', 'ipred', 'mboost', 'lars', 'car'))
+
+```
+
+---
+
+```{r}
+w <- read.csv('data/concrete.csv') |>
+  glimpse()
+
+```
+
+---
+
+```{r}
+X <- cbind(intercept = 1, as.matrix(w[ ,-9]))
+y = w[,9]
+beta <- solve(t(X)%*%X)%*%t(X)%*%y
+t(beta)
+```
+
+```{r}
+lm(Concrete.compressive.strength.MPa..megapascals.. ~., w)$coef
+
+```
+
+---
+
+```{r}
+set.seed(8888)
+D = 1 # 因变量在数据集中的位置
+Z = 10 # 折数
+n = nrow(w) # 样本量
+I = sample(rep(1:Z, ceiling(n/Z)))[1:n]
+```
+
+---
+
+```{r}
+pred = rep(999, n)
+f = formula(paste(names(w)[D], "~."))
+for (i in 1:Z) {
+  m = (1:n)[I == i]
+  pred[m] = lm(f, data = w[-m,]) |> predict(w[m,])
+}
+M = sum((w[,D]-mean(w[,D]))^2)
+nmse = sum((w[,D]-pred)^2)/M
+nmse
+```
+
+---
+
+```{r}
+NM = names(w)
+n = nrow(w)
+D = 9
+f1 = paste(NM[D], '~btree(', NM[1], ')')
+for (i in 2:8) f1 = paste(f1, '+btree(', NM[i],')')
+(f1 = formula(f1))
+set.seed(8888)
+D = 9; Z = 10; n = nrow(w)
+I = sample(rep(1:Z, ceiling(n/Z)))[1:n]
+
+FUN = c(lm, rpart, bagging, randomForest, mboost, gbm)
+pred = matrix(999, n, length(FUN))
+f = formula(paste(names(w)[D], '~.'))
+for (i in 1:Z){
+  m = (1:n)[I == i]
+  k = 1
+  for (fun in FUN) {
+    if (k != 5) f0 = f else f0 = f1
+    pred[m,k] = fun(f0, data = w[-m,]) |> predict(w[m,])
+    k = k+1
+  }
+}
+
+M = sum((w[, D]-mean(w[,D]))^2)
+NMSE = sapply(data.frame(pred), function(x) sum((w[,D] - x)^2)/M)
+name_nmse = c('lm', 'rpart', 'bagging', 'randomForest', 'mboost', 'gbm')
+names(NMSE) = name_nmse
+barplot(NMSE, horiz = T, col = 4, las = 1, xlab = 'NMSE')
+title('NMSE in 10-fold cross validation for 6 regression models')
+```
+---
+```{r}
+c1 = lm(Concrete.compressive.strength.MPa..megapascals.. ~ .-1, w)$coef
+c2 = sapply(w[,-9], function(x) lm(w$Concrete.compressive.strength.MPa..megapascals.. ~ x-1)$coef)
+barplot(rbind(c1, c2), beside = T, horiz = T, col = c(15, 1), cex.names = .7, las = 1)
+legend('bottomright', c('Coefficients of multiple regression', 
+                        'Coefficients of univariate regressions'),
+       fill = c(15, 1))
+title('Coefficient comparison between multiple and univariate regressions without constant term')
+```
+---
+```{r}
+Cloth = function(seed = 99) {
+  set.seed(seed)
+  x = matrix(rnorm(200), 40, 5, by = TRUE)  # 生成40x5的矩阵（此处有误，应为`byrow = TRUE`）
+  y = x %*% (1:5) + rnorm(40)              # 计算y = x1*1 + x2*2 + ... + x5*5 + 噪声
+  df = data.frame(y = y, X = x)            # 创建数据框，列名为y和X1-X5
+  c1 = lm(y ~ . - 1, df)$coef              # 多元回归（无截距）的系数
+  c2 = sapply(df[, 2:6], function(x) lm(y ~ x - 1)$coef)  # 单变量回归系数
+  barplot(rbind(c1, c2), beside = T, horiz = T, col = c(15,1), cex.names = .3)              # 绘制系数对比图
+  title(paste('seed = ', seed))            # 添加标题
+  Kappa = kappa(as.matrix(x), exact = T)   # 计算矩阵条件数
+  Mvif = max(car::vif(lm(y ~ . -1, df)))   # 计算最大方差膨胀因子
+  return(c(Kappa, Mvif))
+}
+par(mfrow = c(3, 6))  # 设置3行6列的子图布局
+COL = NULL            # 初始化空矩阵
+for (i in 99999:(99999 + 17)) {
+  COL = cbind(COL, Cloth(i))  # 循环18次，每次调用Cloth函数并合并结果
+}
+```
+
+---
+```{r}
+data('diabetes')
+w <- as.matrix(diabetes)
+kappa(w[,12:75],,exact = T)
+vif(lm(y~., as.data.frame(w)[,11:75]))
+```
+
+---
+
+```{r}
+data("diabetes")
+w = as.matrix(diabetes)
+library(ridge)
+a = linearRidge(y ~ ., as.data.frame(w)[,11:75])
+summary(a)
+plot(a)
+
+```
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
