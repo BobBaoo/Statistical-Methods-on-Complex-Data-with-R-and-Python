@@ -1,0 +1,413 @@
+---
+title: "chp13 R Python"
+author: "bob"
+date: "2025-03-21"
+output: html_document
+---
+
+## vector assignment
+```{r}
+x = 1:100
+(x = 1:100) # visualization
+```
+
+### sample
+```{r}
+sample(x, 20) # 随机不放回20个
+
+set.seed(0) # 设置随机种子
+sample(1:10, 3)
+
+z = sample(1:200000, 10000)
+z[1:10] # 取前十个
+
+y = c(1, 3, 7, 3, 4, 2)
+z[y]
+
+(z = sample(x, 100, rep = T)) # 有放回抽样
+(z1 = unique(z))
+length(z1)
+xz = setdiff(x, z) # x和z的差异
+sort(union(xz,z)) # 排序
+setequal(union(xz, z), x) # 检查两个数据集是否一致
+intersect(1:10, 7:50) # 交集
+sample(1:100, 20, prob = 1:100) # 不等概率随机抽样
+
+```
+
+### caculation
+```{r}
+pi * 10^2
+
+pi * (1:10)^-2.3
+
+pi ^ (1:5)
+
+(x = pi * 10^2)
+print(x, digits = 22)
+
+```
+
+
+### type
+```{r}
+x = pi * 10^2
+class(x)
+typeof(x)
+class(cars)
+typeof(cars)
+names(cars) # 获取变量名
+summary(cars) # 汇总描述统计
+```
+
+
+### view
+```{r}
+
+head(cars) # 头几行
+tail(cars) # 尾几行
+str(cars) # 查看数据
+row.names(cars) # 行名
+attributes(cars) # 查看信息
+
+```
+
+
+### plots
+```{r}
+class(dist ~ speed)
+plot(dist ~ speed, cars)
+plot(cars$dist ~ cars$speed)
+```
+
+
+### regression
+```{r}
+ncol(cars);nrow(cars)
+dim(cars)
+lm(dist ~ speed, data = cars) # OLS回归
+cars$qspeed = cut(cars$speed, breaks = quantile(cars$speed), include.lowest = T) # 增加变量qspeed，四分位点为分割点
+names(cars)
+cars[3]
+table(cars[3])
+is.factor(cars$qspeed)
+plot(dist ~ qspeed, data = cars) # 箱线图
+(a = lm(dist ~ qspeed, cars))
+summary(a)
+```
+### simple descriptive statistics
+```{r}
+x <- round(runif(20,0,20), digits = 2)
+summary(x)
+min(x); max(x)
+median(x)
+mean(x)
+var(x)
+sd(x)
+sqrt(var(x))
+rank(x)
+order(x)
+order(x, decreasing = T)
+sort(x)
+sort(x, decreasing = T)
+sum(x); length(x)
+round(x)
+fivenum(x)
+quantile(x)
+quantile(x, c(0,0.33,0.66,1))
+mad(x)
+cummax(x)
+cummin(x)
+cumprod(x)
+cor(x, sin(x/20))
+```
+
+### simple plots
+```{r}
+x = rnorm(200)
+hist(x, col = 'light blue')
+rug(x)
+stem(x)
+
+x <- rnorm(500)
+y <- x + rnorm(500)
+plot(y ~ x)
+a = lm(y ~ x)
+abline(a, col = 'red')
+print('hello world')
+paste('x min = ', min(x))
+# demo(graphics)
+```
+
+### 复数运算，求函数极值，多项式的根
+```{r}
+(z <- complex(real = rnorm(10), imaginary = rnorm(10)))
+complex(re = rnorm(3), im = rnorm(3))
+Re(z)
+Im(z)
+Mod(z)
+Arg(z)
+choose(3,2)
+factorial(6)
+
+# 定义函数 define f(x)
+test = function(x, den, ...) {
+  y = den(x, ...)
+  return(y)
+}
+test(12, dnorm, 10, 1)
+plot(seq(0,5,.1), test(seq(0,5,.1), dgamma,5,5), type = 'l')
+
+f = function(x) x^2 + 2*x +1
+optimize(f, c(-2,2))
+curve(f, from = -3, to = 2)
+
+polyroot(c(1,2,2,3,-9,8))
+```
+### 字符型向量和因子型向量
+```{r}
+a = factor(letters[1:10]); a
+a = as.character(a)
+a[3] = 'w'
+a; factor(a)
+levels(factor(a))
+sex = sample(0:1, 10, r = T)
+sex = factor(sex); levels(sex)
+levels(sex) = c('Male', 'Female'); levels(sex)
+sex = ordered(sex, c('Female', 'Male')); sex
+levels(sex)
+```
+
+### 数据输入输出data input and output 
+```{r}
+x = c(1.5, 2.6, 3.7, 2.1, 8.9, 12, -1.2, -4)
+
+# w = read.table(file.choose(), header = T)
+
+getwd()
+# setwd()
+
+(x = rnorm(20))
+write(x, 'test.txt')
+y = scan('test.txt')
+
+y = iris; y[1:5,];str(y)
+write.table(y, 'test.txt', row.names = F)
+w = read.table('test.txt', header = T)
+str(w)
+
+write.csv(y, 'test.csv')
+v = read.csv('test.csv')
+str(v)
+# data = read.table('clipboard')
+
+
+```
+
+### 序列 sequence
+```{r}
+(z = seq(-1,10,len = 100))
+(z = seq(10,-1,-0.1))
+(x = rep(1:3, 3))
+(x = rep(3:5,1:3))
+x = rep(c(1,10), c(4,5))
+w = c(1,3,x,z); w[3]
+x = rep(0,10); z = 1:3; x + z
+x * z
+rev(x)
+z = c('no cat', ' has', 'nine', 'tails')
+z[1] == 'no cat'
+z = 1:5
+z[7] = 8; z
+z = NULL
+z[c(1, 3, 5)] = 1:3; z
+rnorm(10)[c(2,5)]
+z[-c(1,3)]
+z = sample(1:100, 10); z
+which(z == max(z))
+```
+
+```{r}
+x = sample(1:100, 12); x
+all(x > 0); all(x != 0); any(x > 0); (1:10)[x > 0]
+diff(x)
+diff(x, lag = 2)
+x = matrix(1:20, 4, 5); x
+x = matrix(1:20, 4, 5, byrow = T); x
+t(x)
+x = matrix(sample(1:100, 20), 4, 5)
+2*x
+x + 5
+y = matrix(sample(1:100, 20), 5, 4)
+x + t(y)
+(z = x %*% y)
+z1 = solve(z)
+z1 %*% z
+round(z1 %*% z, 14)
+b = solve(z, 1:4); b
+
+# more exercise
+nrow(x);ncol(x);dim(x)
+x = matrix(rnorm(24), 4, 6)
+x[c(2,1),]
+x[,c(1,3)]
+x[2,1]
+x[x[,1]>0, 1]
+sum(x[,1]>0)
+sum(x[,1]<=0)
+x[,-c(1,3)]
+diag(x)
+diag(1:5)
+diag(5)
+x[-2, -c(1,3)]
+x[x[,1]>0 & x[,3]<=1, 1]
+x[x[,2]>0 | x[,3]<.51, 1]
+x[!x[,2]<.51, 1]
+apply(x, 1, mean)
+apply(x, 2, sum)
+x = matrix(rnorm(24), 4, 6)
+x[lower.tri(x)] = 0; x
+(x[upper.tri(x)] = 0)
+```
+```{r}
+x = array(runif(24), c(4, 3, 2))
+is.matrix(x)
+dim(x)
+is.matrix(x[1,,])
+x = array(1:24, c(4, 3, 2))
+x[c(1,3),,]
+x = array(1:24, c(4, 3, 2))
+apply(x, 1, mean)
+apply(x, 1:2, sum)
+apply(x, c(1,3), prod)
+x = matrix(1:20, 5, 4)
+sweep(x, 1, 1:5, "*")
+sweep(x, 2, 1:4, "+")
+x* 1:5
+(x = matrix(sample(1:100, 24), 6, 4)); (x1 = scale(x))
+(x2 = scale(x, scale = F))
+(x3 = scale(x, center = F))
+round(apply(x1, 2, mean), 14)
+apply(x1, 2, sd)
+round(apply(x2, 2, mean), 14); apply(x2, 2, sd)
+round(apply(x3, 2, mean), 14); apply(x3, 2, sd)
+```
+### NA
+```{r}
+airquality
+complete.cases(airquality)
+which(complete.cases(airquality) == F)
+sum(complete.cases(airquality))
+na.omit(airquality)
+```
+### combine
+```{r}
+x = 1:10; x[12] = 3; x
+(x1 = append(x, 77, after = 5))
+
+cbind(1:5, rnorm(5))
+rbind(1:5, rnorm(5))
+cbind(1:3, 4:6); rbind(1:3, 4:6)
+(x = rbind(1:5, runif(5), runif(5), 1:5, 7:11))
+
+x[!duplicated(x), ]
+unique(x)
+```
+
+### list
+
+```{r}
+# list 可以是任何对象（包括list本身）的集合
+z = list(1:3, Tom = c(1:2, a = list('R', letters[1:5]), w = 'hi!'))
+z[[1]];z[[2]]
+z$T
+z$T$a2
+z$T$w
+for (i in z) {
+  print(i)
+  for (j in i)
+    print(j)
+}
+
+y = list(1:5, rnorm(10))
+lapply(y, function(x) sum(x^2))
+sapply(y, function(x) sum(x^2))
+```
+
+
+### barplot and table
+```{r}
+x = c(3, 3, 3, 4, 1, 4, 2, 1, 3, 2, 5, 3, 1, 4, 2, 2, 4, 3, 5, 2)
+barplot(x)
+table(x)
+barplot(table(x))
+barplot(table(x)/length(x))
+table(x)/length(x)
+```
+
+### table
+```{r}
+library(MASS)
+quine
+
+attach(quine)
+table(Age)
+table(Sex, Age); tab = xtabs(~ Sex + Age, quine); unclass(tab)
+tapply(Days, Age, mean)
+tapply(Days, list(Sex, Age), mean)
+detach(quine)
+```
+
+### define a function
+```{r}
+ss = function(n = 100){z = 2;
+  for (i in 2:n) if (any(i%%2: (i-1) == 0) == F) z = c(z,i); return(z) }
+ss()
+ss = function(n = 100){
+  z = 2;
+  for (i in 2:n) {
+    if (any(i%%2:(i-1) == 0) == F){
+      z = c(z, i)
+    }
+  }
+  return(z)
+}
+ss()
+# fix(ss)
+
+t1 = Sys.time()
+ss(10000)
+Sys.time()-t1
+system.time(ss(10000))
+
+```
+
+```{r}
+x = seq(-3, 3, len = 20); y = dnorm(x)
+w = data.frame(x,y)
+
+par(mfcol= c(2, 2))
+plot(y ~ x, w, main = '正太密度函数')
+plot(y ~ x, w, type = 'l', main = '正太密度函数')
+plot(y ~ x, w, type = 'o', main = '正太密度函数')
+plot(y ~ x, w, type = 'b', main = '正太密度函数')
+
+par(mfcol = c(1,1))
+plot(1, 1, xlim = c(1, 7.5), ylim = c(0, 5), type = 'n')
+points(1:7, rep(4.5, 7), cex = seq(1,4, l = 7), col = 1:7, pch = 0:6)
+text(1:7, rep(3.5,7), labels = paste(0:6, letters[1:7]), cex = seq(1,4, l = 7), col = 1:7)
+points(1:7, rep(2,7), pch = (0:6)+7)
+text((1:7)+0.25, rep(2, 7), paste((0:6)+7))
+points(1:7, rep(1, 7), pch = (0:6)+14)
+text((1:7)+0.25, rep(1, 7), paste((0:6)+14))
+```
+
+
+
+
+
+
+
+
+
+
